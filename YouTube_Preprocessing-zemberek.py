@@ -7,7 +7,7 @@ warnings.filterwarnings("ignore")
 import nltk
 from typing import List
 import os
-#from nltk.corpus import stopwords
+from collections import Counter
 import jpype 
 from jpype import JClass, JString, getDefaultJVMPath, shutdownJVM, startJVM, java,JPackage
 
@@ -40,7 +40,8 @@ normalizer = TurkishSentenceNormalizer(
 )
 
 "----Loading the dataset---"
-df = pd.read_excel(r"C:\Users\gamze\OneDrive\Masaüstü\Gamze\LESSONS OF FOURTH CLASS\2nd Term\intro to Data Mining\YouTubeComments_Analyasis_Project\Datasets\Raw_Dataset\YoutubeComments_RawData.xlsx")
+df = pd.read_excel(r"C:\YouTubeComments_Analyasis_Project\Datasets\Datasets_afterPreprocessing\16.Normalization_RemovalPunc_Lemma_Stopword(1111).xlsx")
+
 
 "----------------------Lemmatization-------------------------"
 def Lemmatization(text):
@@ -110,7 +111,24 @@ def removal_emoticons (text):
                                "]+", flags=re.UNICODE)
     return emoticons.sub(r"",text)
 
+# ----------- Find most common 100 words-----------------
+def find_most_common_words(text_list: List[str], top_n: int):
+    all_words = []
+    for text in text_list:
+        words = str(text).split()
+        all_words.extend(words)
+    word_counts = Counter(all_words)
+    top_words = word_counts.most_common(top_n)
+    top_words_dict = {word: count for word, count in top_words}
+    return top_words_dict
 
+comment_list = df["Comment"].tolist()
+top_words_dict = find_most_common_words(comment_list, top_n=100)
+print("Most common words:")
+for word, count in top_words_dict.items():
+    print(f"{word}: {count}")
+    
+"""
 #df["removal_stopwords"] = df["Comment"].apply(removal_stopwords)
 df["normalize_text"] = df["Comment"].apply(lambda text :  normalize_text(text) )
 df["removal_stopwords"] = df["normalize_text"].apply(lambda text :  removal_stopwords(text) )
@@ -124,6 +142,6 @@ df["removal_emoticons"] = df["dataCleaning"].apply(lambda text :  removal_emotic
 
 
 pd.concat([pd.concat([df["Cyberbullying"],df["UserName"], df["removal_emoticons"]], axis=1)]).to_excel('16.Normalization_RemovalPunc_Lemma_Stopword(1111).xlsx')
-
-print(df.head())
+"""
+#print(df.head())
 jpype.shutdownJVM()
